@@ -96,29 +96,40 @@ module.exports = function (grunt) {
       },
       dist: {
         options: {
-          base: 'src',
+          base: 'dist',
           keepalive: true
         }
       }
     },
 
     copy: {
-      dist: {
-        files: [
-          {
-            expand: true,
-            cwd: 'src',
-            src: SRC_FILES.map(function (item) {
-              return item.replace('src/', '')
-            }),
-            dest: 'dist'
+      all: {
+        expand: true,
+        cwd: 'src',
+        src: SRC_FILES
+          .map(function (item) {
+            return item.replace('src/', '')
+          }).filter(function (item) {
+            return item.indexOf('.html') === -1
+          }),
+        dest: 'dist'
+      },
+      markup: {
+        expand: true,
+        cwd: 'src',
+        src: '**/*.html',
+        dest: 'dist',
+        options: {
+          process: function (content, srcpath) {
+            var r = content.replace(/<!-- livereload -->(.|[\r\n])*<!-- livereload -->/gm, '')
+            return r
           }
-        ]
+        }
       }
     }
   })
 
   grunt.registerTask('default', ['clean:dev', 'browserify:dev', 'sass:dev', 'connect:dev', 'watch'])
-  grunt.registerTask('build', ['clean', 'browserify:dist', 'sass:dist', 'copy:dist', 'clean:dev'])
+  grunt.registerTask('build', ['clean', 'browserify:dist', 'sass:dist', 'copy', 'clean:dev'])
   grunt.registerTask('live', ['build', 'connect:dist'])
 }
